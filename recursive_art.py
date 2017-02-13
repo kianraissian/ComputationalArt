@@ -1,10 +1,13 @@
 """ TODO: Put your header comment here """
 
 import random
+import math
 from PIL import Image
 
-
-def build_random_function(min_depth, max_depth):
+xylist = [["x"],["y"]]
+randomlist = ["prod", "avg", "cos_pi", "sin_pi", "squared", "sqrt"]
+anotherlist=["cos_pi","sin_pi","squared","sqrt"]
+def build_random_function(max_depth):
     """ Builds a random function of depth at least min_depth and depth
         at most max_depth (see assignment writeup for definition of depth
         in this context)
@@ -15,8 +18,18 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    # TODO: implement this
-    pass
+    if max_depth==0:
+        a=random.randint(0,1)
+        function=xylist[a]
+        return function
+    else:
+        max_depth-=1
+        a=random.randint(0,5)
+        function=randomlist[a]
+        if function in anotherlist:
+            return [function, build_random_function(max_depth)]
+        else:
+            return [function, build_random_function(max_depth),build_random_function(max_depth)]
 
 
 def evaluate_random_function(f, x, y):
@@ -33,8 +46,30 @@ def evaluate_random_function(f, x, y):
         >>> evaluate_random_function(["y"],0.1,0.02)
         0.02
     """
-    # TODO: implement this
-    pass
+    if f==["x"]:
+        return x
+    if f==["y"]:
+        return y
+    if f[0]=='prod':
+        a1 = evaluate_random_function(f[1],x,y)
+        a2 = evaluate_random_function(f[2],x,y)
+        return a1*a2
+    if f[0]=='avg':
+        a1=evaluate_random_function(f[1],x,y)
+        a2=evaluate_random_function(f[2],x,y)
+        return .5*(a1+a2)
+    if f[0]=='cos_pi':
+        a1=evaluate_random_function(f[1],x,y)
+        return math.cos(math.pi*a1)
+    if f[0]=='sin_pi':
+        a1=evaluate_random_function(f[1],x,y)
+        return math.sin(math.pi*a1)
+    if f[0]=='squared':
+        a1=evaluate_random_function(f[1],x,y)
+        return a1**2
+    if f[0]=='sqrt':
+        a1=evaluate_random_function(f[1],x,y)
+        return math.sqrt(math.fabs(a1))
 
 
 def remap_interval(val,
@@ -64,8 +99,17 @@ def remap_interval(val,
         >>> remap_interval(5, 4, 6, 1, 2)
         1.5
     """
-    # TODO: implement this
-    pass
+
+    input_interval=input_interval_end - input_interval_start
+    output_interval=output_interval_end - output_interval_start
+    scale=output_interval / input_interval
+    start_interval=output_interval_start - input_interval_start
+    end_interval= output_interval_end - input_interval_end
+    newval=val + start_interval
+    scaledval=newval * scale
+    finalval = scaledval+(scale*output_interval_start)
+    return finalval
+
 
 
 def color_map(val):
@@ -84,7 +128,7 @@ def color_map(val):
         >>> color_map(0.5)
         191
     """
-    # NOTE: This relies on remap_interval, which you must provide
+
     color_code = remap_interval(val, -1, 1, 0, 255)
     return int(color_code)
 
@@ -116,9 +160,9 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    red_function = ["x"]
-    green_function = ["y"]
-    blue_function = ["x"]
+    red_function = build_random_function(13)
+    green_function = build_random_function(13)
+    blue_function = build_random_function(13)
 
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
@@ -137,14 +181,14 @@ def generate_art(filename, x_size=350, y_size=350):
 
 
 if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
+    # import doctest
+    # doctest.testmod()
 
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    # generate_art("myart.png")
+    generate_art("myart.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
-    test_image("noise.png")
+    # test_image("noise.png")
